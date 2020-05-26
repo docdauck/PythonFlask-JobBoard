@@ -8,7 +8,7 @@
     <div class="card-content">
       <div class="content">
         <p>
-          <a>{{ job['employer_name'] }}</a>
+          <a>{{ job['employer_name'] }} href={{ url_for('job', job_id=job['id']) }}</a>
           ${{ job['salary'] }}
           {{ job['description'] }}
         </p>

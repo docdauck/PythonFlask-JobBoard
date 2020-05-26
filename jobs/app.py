@@ -1,7 +1,6 @@
 from flask import Flask, render_template, g
 import sqlite3
 
-
 PATH = 'db/jobs.sqlite'
 app = Flask(__name__)
 
@@ -16,7 +15,7 @@ def open_connection():
 
 def execute_sql(sql, values=(), commit=False, single=False):
     connection = open_connection()
-    cursor = connection.execute(sql,values)
+    cursor = connection.execute(sql, values)
     if commit:
         results = connection.commit()
     else:
@@ -27,13 +26,22 @@ def execute_sql(sql, values=(), commit=False, single=False):
 
 @app.teardown_appcontext
 def close_connection(exception):
-   connection = getattr(g,'_connection',None)
-   if connection is not None:
-       connection.close()
+    connection = getattr(g, '_connection', None)
+    if connection is not None:
+        connection.close()
 
 
 @app.route('/jobs')
 @app.route('/')
 def jobs():
-    jobs = execute_sql('SELECT job.id, job.title, job.description, job.salary, employer.id as employer_id, employer.name as employer_name FROM job JOIN employer ON employer.id = job.employer_id')
-    return render_template('index.html',jobs=jobs)
+    jobs = execute_sql('SELECT job.id, job.title, job.description, job.salary, employer.id as employer_id, '
+                       'employer.name as employer_name FROM job JOIN employer ON employer.id = job.employer_id')
+    return render_template('index.html', jobs=jobs)
+
+
+@app.route('/job/<job_id>')
+def job(job_id):
+    execute_sql('SELECT job.id, job.title, job.description, job.salary, employer.id as employer_id, employer.name as '
+                'employer_name FROM job JOIN employer ON employer.id = job.employer_id WHERE job.id = ?', [job_id],
+                single=True)
+    return render_template('job.html',job=job)
